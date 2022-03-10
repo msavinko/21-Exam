@@ -1,0 +1,79 @@
+WIDTH HEIGHT BACKGROUND_CHAR
+
++++++++++++++++++++++++++++++
+fopen
+
+FILE*fopen(const char *filename, const char *mode);
+filename - which file to open, 
+mode - which mode.
+
+return NULL or pointer to the opened file.
+r или rb – открытие файла для чтения. 
+Если файла не существует, работа программы завершится с ошибкой.
+
+ FILE *mf;
+ mf=fopen (“myfile/test.txt”,”w”);
+
++++++++++++++++++++++++++++++
+fclose
+
+int fclose (FILE *stream);
+0 – если поток данных и связанный с ним файл успешно закрыты.
+EOF (-1) – если во время работы функции возникла ошибка. 
+При этом переменной errno будет присвоен код ошибки.
+
+
+#include < stdio.h >
+int main (void)
+{  
+   FILE *mf; 
+   mf=fopen (“myfile/test.txt”,”r”);
+
+   if (mf == NULL) printf (“ошибка\n”);
+   else printf (“выполнено\n”);
+
+   if ( fclose (mf) == EOF) printf (“ошибка\n”);
+   else printf (“выполнено\n”);
+
+   return 0;
+} 
+
++++++++++++++++++++++++++++++
+
+fread
+
+size_t fread(void *buf, size_t size, size_t count, FILE *stream);
+Считывает count объектов размера size
+из потока stream и помещает их в buf;
+
+int main(void)
+{
+FILE *fp;
+
+float bal[10];
+
+if ((fp=fopen("test", "rb"))==NULL)
+{
+	printf ("Cannot open file.\n");
+	exit(1);
+}
+if(fread(bal, sizeof(float), 10, fp)!=10)
+{
+	if(feof(fp)) printf("Premature end of file.");
+	else printf("File read error.");
+}
+fclose(fp);
+return 0;
+}
++++++++++++++++++++++++++++++
+
+fscanf
+
+int fscanf(FILE *stream, const char *format, arg-list);
+считывает информацию из потока stream.
+
+Данный фрагмент кода считывает строку
+и число типа float из потока fp:
+char str [80];
+float f;
+fscanf(fp, "%s%f", str, &f);
