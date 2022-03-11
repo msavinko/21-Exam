@@ -1,117 +1,87 @@
 #include <stdio.h>
+#include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include <math.h>
 #include <stdlib.h>
 
-typedef struct s_info
+int	ft_error(FILE *file, char * map)
 {
-	FILE *file;
-	int	scan;
-	int	scan1;
-	int width;
-	int height;
-	char back;
-	char *map;
-	int	len;
-	char type;
-	float x;
-	float y;
-	float radius;
-	char border;
-	float	dist;
-} t_info;
-
-int	ft_error(t_info *info)
-{
-	if (info->file)
-		fclose(info->file);
-	if (info->map)
-		free(info->map);
-	(void)info;
-	write(2, "Error: Operation file corrupted\n", 32);
+	if (file)
+		fclose(file);
+	if (map)
+		free(map);
+	write(1, "Error: Operation file corrupted\n", 32);
 	return (1);
 }
-void	ft_init(t_info *info)
-{
-	info->file = NULL;
-	info->map = NULL;
-	info->scan = 0;
-	info->width = 0;
-	info->height = 0;
-	info->back = 0;
-	info->len = 0;
-	info->dist = 0;
-}
-void	ft_print_pic(t_info *info)
+void	ft_print(char *map, int width, int height)
 {
 	int h = 0;
-	while (h < info->height)
+	while (h < height)
 	{
-		write(1, &info->map[h * info->width], info->width);
+		write(1, &map[h * width], width);
 		write(1, "\n", 1);
 		h++;
 	}
 }
 
-void ft_draw(t_info *info)
+int	ft_scan_all(FILE *file, char *map, int width, int height)
 {
+	int	scan2;
 	int w, h = 0;
-	while (h < info->height)
+	char type, border;
+	float x, y, r, dist;
+	while ((scan2 = fscanf(file, "%c %f %f %f %c", &type, &x, &y, &r, &border)) == 5)
 	{
-		w = 0;
-		while (w < info->width)
-		{
-			info->dist = sqrtf(powf(info->x - w, 2.0f) + powf(info->y - h, 2.0f));
-			if (info->dist <= info->radius)
-			{
-				if (info->type == 'C' || info->dist > info->radius - 1)
-					info->map[h * info->width + w] = info->border;
-			}
-			w++;
-		}
-		h++;
-	}
-}
-int	ft_read_data(t_info *info)
-{
-	while ((info->scan1 = fscanf(info->file, "%c %f %f %f %c\n", &info->type, &info->x, &info->y, &info->radius, &info->border)) == 5)
-	{
-		if ((info->type != 'c' && info->type != 'C') || info->radius <= 0.0f)
+		if (type != 'C' || type != 'c' || r <= 0.0f)
 			return (1);
-		ft_draw(info);
+		while (h < height)
+		{
+			w = 0;
+			while (w < width)
+			{
+				dist = sqrtf(powf(x - w, 2.0f) + powf(y - h, 2.0f));
+				if (dist <= r)
+				{
+					if (type == 'C' || dist > r - 1)
+						map[h * width + w] = border;
+				}
+			}
+			h++;
+		}
 	}
-	if (info->scan1 != -1)
+	if (scan2 != -1)
 		return (1);
 	return (0);
 }
 
-int	main(int argc, char **argv)
+int main(int argc, char **argv)
 {
-	t_info	info;
+	FILE	*file;
+	int	scan1;
+	int	width, height;
+	char back;
+	char *map;
 
+	map = NULL; file = NULL;
 	if (argc != 2)
 	{
-		write(2, "Error: argument\n", 16);
+		write(1, "Error: argument\n", 16);
 		return (1);
 	}
-	ft_init(&info);
-	info.file = fopen(argv[1], "r");
-	if (info.file == NULL)
-		return (ft_error(&info));
-	info.scan = fscanf(info.file, "%d %d %c\n", &info.width, &info.height, &info.back);
-	if (info.scan != 3 || info.width < 0 || info.width > 300 || info.height < 0 || info.height > 300)
-		return (ft_error(&info));
-	info.len = info.width * info.height;
-	info.map = malloc(info.len + 1);
-	memset(info.map, info.back, info.len);
-	info.map[info.len] = '\0';
-
-	if (ft_read_data(&info))
-		return (ft_error(&info));
-
-	ft_print_pic(&info);	
-	free(info.map);
-	fclose(info.file);
+	if (!(file = fopen(argv[1], "r")))
+		return (ft_error(file, map));
+	if ((scan1 = fscanf(file, "%d %d %c", &width, &height, &back)) != 3)
+		return (ft_error(file, map));
+	if (width <= 0 || width > 300 || height <= 0 || height > 300)
+		return (ft_error(file, map));
+	if (!(map = malloc(width * height + 1)))
+		return (ft_error(file, map));
+	map[width * height] = '\0';
+	memset(map, back, width * height);
+	if (ft_scan_all(file, map, width, height))
+		return (ft_error(file, map));
+	ft_print(map, width, height);
+	free(map);
+	fclose(file);	
 	return (0);
 }
