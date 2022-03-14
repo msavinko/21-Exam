@@ -98,7 +98,7 @@ int	main(int argc, char **argv)
 	info.file = fopen(argv[1], "r");
 	if (info.file == NULL)
 		return (ft_error(&info));
-		info.scan = fscanf(info.file, "%d %d %c\n", &info.width, &info.height, &info.back);
+	info.scan = fscanf(info.file, "%d %d %c\n", &info.width, &info.height, &info.back);
 	if (info.scan != 3)
 		return (ft_error(&info));
 	if (info.width <= 0 || info.width > 300 || info.height <= 0 || info.height > 300)

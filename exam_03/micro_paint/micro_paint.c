@@ -94,7 +94,7 @@ int main(int argc, char **argv)
 4 frame
 5 malloc + \0
 6 memset
-7 scan_all 
+7 scan_all (h < height) (w < width)
 8 print_pic
 9 free
 10 close
